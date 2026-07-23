@@ -19,7 +19,7 @@ void System::RemoveEntityFromSystem(Entity entity)
             entities.end(),
             [&entity](Entity other)
             {
-                return entity.GetId() == other.GetId();
+                return entity == other;
             }),
         entities.end());
 }
