@@ -154,7 +154,11 @@ public:
 
     Entity CreateEntity();
 
-    void AddEntityToSystem(Entity entity);
+    template <typename TComponent, typename... TArgs>
+    void AddComponent(Entity entity, TArgs &&...args)
+    {
+    }
+    // void AddEntityToSystem(Entity entity);
 };
 
 template <typename TComponent>
@@ -164,4 +168,33 @@ void System::RequireComponent()
     componentSignature.setId(componentId);
 }
 
+template <typename TComponent, typename... TArgs>
+void Registry::AddComponent(Entity entity, TArgs &&...args)
+{
+    const auto componentId = Component<TComponent>::GetId();
+    const auto entityId = entity.GetId();
+
+    if (componentId >= componentPools.size())
+    {
+        componentPools.resize(componentId + 1, nullptr);
+    }
+
+    if (!componentPools[componentId])
+    {
+        Pool<TComponent> *newComponentPool = new Pool<TComponent>();
+        componentPools[componentId] = newComponentPool;
+    }
+
+    Pool<TComponent> *componentPool = componentPools[componentId];
+
+    if (entityId >= componentPool->GetSize())
+    {
+        componentPool->Resize(numEntities);
+    }
+
+    TComponent newComponent(std::forward<TArgs>(args)...);
+
+    componentPool->Set(entityId, newComponent);
+    entityComponentSignatures[entityId].set(componentId);
+}
 #endif
