@@ -3,6 +3,7 @@
 
 #include <bitset>
 #include <vector>
+#include <set>
 #include <unordered_map>
 #include <typeindex>
 
@@ -141,11 +142,19 @@ private:
     // Vector of component signatures per entity
     std::vector<Signature> entityComponentSignature;
 
-    //
     std::unordered_map<std::type_index, System *> systems;
+
+    std::set<Entity> entitiesToBeAdded;
+    std::set<Entity> entitiesToBeKilled;
 
 public:
     Registry() = default;
+
+    void Update();
+
+    Entity CreateEntity();
+
+    void AddEntityToSystem(Entity entity);
 };
 
 template <typename TComponent>
