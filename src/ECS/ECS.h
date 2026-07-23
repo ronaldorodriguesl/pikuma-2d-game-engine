@@ -3,8 +3,11 @@
 
 #include <bitset>
 #include <vector>
+#include <unordered_map>
+#include <typeindex>
 
 const unsigned int MAX_COMPONENTS = 32;
+
 typedef std::bitset<MAX_COMPONENTS> Signature;
 
 struct IComponent
@@ -30,7 +33,7 @@ private:
 
 public:
     Entity(int id) : id(id) {};
-    Entity(const Entity& entity) = default;
+    Entity(const Entity &entity) = default;
     int GetId() const;
 
     Entity &operator=(const Entity &other) = default;
@@ -45,6 +48,7 @@ public:
     }
 };
 
+// System processes entities that contain a specific signature
 class System
 {
 private:
@@ -64,9 +68,84 @@ public:
     template <typename TComponent>
     void RequireComponent();
 };
+// Just a vector that of objects type T
 
+class IPool
+{
+public:
+    virtual ~IPool() {}
+};
+template <typename T>
+class Pool : public IPool
+{
+private:
+    std::vector<T> data;
+
+public:
+    Pool(int size = 100)
+    {
+        data.resize(size);
+    }
+
+    virtual ~Pool() = default;
+
+    bool isEmpty() const
+    {
+        return data.empty();
+    }
+
+    int GetSize() const
+    {
+        return data.size();
+    }
+
+    void Resize(int n)
+    {
+        data.resize(n);
+    }
+
+    void Clear()
+    {
+        data.clear();
+    }
+
+    void Add(T object)
+    {
+        data.push_back(object);
+    }
+
+    void Set(int index, T object)
+    {
+        data[index] = object;
+    }
+
+    T &Get(int index)
+    {
+        return static_cast<T &>(data[index]);
+    }
+
+    T &operator[](unsigned int index)
+    {
+        return data[index];
+    }
+};
+// The registry manages the creation and destruction of entities, add systems and components
 class Registry
 {
+private:
+    int numEntities = 0;
+
+    // Vector of component tools, each pool contains all the data for certain component
+    std::vector<IPool *> componentPools;
+
+    // Vector of component signatures per entity
+    std::vector<Signature> entityComponentSignature;
+
+    //
+    std::unordered_map<std::type_index, System *> systems;
+
+public:
+    Registry() = default;
 };
 
 template <typename TComponent>
