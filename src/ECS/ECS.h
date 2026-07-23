@@ -1,4 +1,4 @@
-#ifndef ESC_H
+#ifndef ECS_H
 #define ECS_H
 
 #include <bitset>
