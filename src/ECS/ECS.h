@@ -140,7 +140,7 @@ private:
     std::vector<IPool *> componentPools;
 
     // Vector of component signatures per entity
-    std::vector<Signature> entityComponentSignature;
+    std::vector<Signature> entityComponentSignatures;
 
     std::unordered_map<std::type_index, System *> systems;
 
@@ -155,17 +155,20 @@ public:
     Entity CreateEntity();
 
     template <typename TComponent, typename... TArgs>
-    void AddComponent(Entity entity, TArgs &&...args)
-    {
-    }
+    void AddComponent(Entity entity, TArgs &&...args);
     // void AddEntityToSystem(Entity entity);
+
+    template <typename TComponent>
+    void RemoveComponent(Entity entity);
+    template <typename TComponent>
+    bool HasComponent(Entity entity) const;
 };
 
 template <typename TComponent>
 void System::RequireComponent()
 {
     const auto componentId = Component<TComponent>::GetId();
-    componentSignature.setId(componentId);
+    componentSignatures.set(componentId);
 }
 
 template <typename TComponent, typename... TArgs>
@@ -197,4 +200,21 @@ void Registry::AddComponent(Entity entity, TArgs &&...args)
     componentPool->Set(entityId, newComponent);
     entityComponentSignatures[entityId].set(componentId);
 }
+
+template <typename TComponent>
+void Registry::RemoveComponent(Entity entity)
+{
+    const auto componentId = Component<TComponent>::GetId();
+    const auto entityId = entity.GetId();
+    entityComponentSignatures[entityId].set(componentId, false);
+}
+
+template <typename TComponent>
+bool Registry::HasComponent(Entity entity) const
+{
+    const auto componentId = Component<TComponent>::GetId();
+    const auto entityId = entity.GetId();
+    return entityComponentSignatures[entityId].test(componentId);
+}
+
 #endif
