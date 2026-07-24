@@ -1,12 +1,14 @@
 #include "Game.h"
-#include "../Logger/Logger.h"
-#include "../ECS/ECS.h"
-#include "../Components/TransformComponent.h"
-#include "../Components/RigidBodyComponent.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
 #include <iostream>
+
+#include "../Logger/Logger.h"
+#include "../ECS/ECS.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/RigidBodyComponent.h"
+#include "../Systems/MovementSystem.h"
 
 Game::Game()
 {
@@ -75,15 +77,13 @@ void Game::ProcessInput()
 
 void Game::Setup()
 {
+    registry->AddSystem<MovementSystem>();
     // Create an entity
     Entity tank = registry->CreateEntity();
 
     // Add some components to that entity
     tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
-
-    // Remove a component from the entity
-    tank.RemoveComponent<TransformComponent>();
 }
 
 void Game::Update()
@@ -101,10 +101,9 @@ void Game::Update()
     // Store the "previous" frame time
     millisecsPreviousFrame = SDL_GetTicks();
 
-    // TODO:
-    // MovementSystem.Update();
-    // CollisionSystem.Update();
-    // DamageSystem.Update();
+    registry->GetSystem<MovementSystem>().Update();
+
+    registry->Update();
 }
 
 void Game::Render()
