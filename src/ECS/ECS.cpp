@@ -1,6 +1,6 @@
 #include "ECS.h"
-#include <algorithm>
 #include "../Logger/Logger.h"
+#include <algorithm>
 
 int IComponent::nextId = 0;
 
@@ -44,6 +44,8 @@ Entity Registry::CreateEntity()
     entityId = numEntities++;
 
     Entity entity(entityId);
+    entity.registry = this;
+
     entitiesToBeAdded.insert(entity);
 
     if (entityId >= entityComponentSignatures.size())
@@ -60,13 +62,12 @@ void Registry::Update()
 {
     for (auto entity : entitiesToBeAdded)
     {
-        AddEntityToSystem(entity);
+        AddEntityToSystems(entity);
     }
 
     entitiesToBeAdded.clear();
 }
-
-void Registry::AddEntityToSystem(Entity entity)
+void Registry::AddEntityToSystems(Entity entity)
 {
     const auto entityId = entity.GetId();
 
