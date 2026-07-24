@@ -6,6 +6,7 @@
 
 #include "../Logger/Logger.h"
 #include "../ECS/ECS.h"
+#include "../AssetStore/AssetStore.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
@@ -16,6 +17,7 @@ Game::Game()
 {
     isRunning = false;
     registry = std::make_unique<Registry>();
+    assetStore = std::make_unique<AssetStore>();
     Logger::Log("Game constructor called!");
 }
 
@@ -82,16 +84,19 @@ void Game::Setup()
     registry->AddSystem<MovementSystem>();
     registry->AddSystem<RenderSystem>();
 
+    assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther.right.png");
+    assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford.right.png");
+
     // Create an entity
     Entity tank = registry->CreateEntity();
     tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(40.0, 0.0));
-    tank.AddComponent<SpriteComponent>(10, 10);
+    tank.AddComponent<SpriteComponent>("tank-image", 10, 10);
 
     Entity truck = registry->CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 50.0));
-    truck.AddComponent<SpriteComponent>(10, 50);
+    truck.AddComponent<SpriteComponent>("truck-image", 10, 50);
 }
 
 void Game::Update()

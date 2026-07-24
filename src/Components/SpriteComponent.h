@@ -6,11 +6,13 @@
 struct SpriteComponent
 {
 
+    std::string assetId;
     int width;
     int heigth;
 
-    SpriteComponent(int width = 0, int heigth = 0)
+    SpriteComponent(std::string assetId = "", int width = 0, int heigth = 0)
     {
+        this->assetId = assetId;
         this->width = width;
         this->heigth = heigth;
     }
