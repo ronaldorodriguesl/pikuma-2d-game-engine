@@ -6,6 +6,7 @@
 #include <set>
 #include <unordered_map>
 #include <typeindex>
+#include <memory>
 
 const unsigned int MAX_COMPONENTS = 32;
 
@@ -137,12 +138,12 @@ private:
     int numEntities = 0;
 
     // Vector of component tools, each pool contains all the data for certain component
-    std::vector<IPool *> componentPools;
+    std::vector<std::shared_ptr<IPool>> componentPools;
 
     // Vector of component signatures per entity
     std::vector<Signature> entityComponentSignatures;
 
-    std::unordered_map<std::type_index, System *> systems;
+    std::unordered_map<std::type_index, std::shared_ptr<System>> systems;
 
     std::set<Entity> entitiesToBeAdded;
     std::set<Entity> entitiesToBeKilled;
@@ -179,13 +180,13 @@ template <typename TComponent>
 void System::RequireComponent()
 {
     const auto componentId = Component<TComponent>::GetId();
-    componentSignatures.set(componentId);
+    componentSignature.set(componentId);
 }
 
 template <typename TSystem, typename... TArgs>
 void Registry::AddSystem(TArgs &&...args)
 {
-    TSystem *newSystem(new TSystem(std::forward<TArgs>(args)...));
+    std::shared_ptr<TSystem> newSystem = std::make_shared<TSystem>(std::forward<TArgs>(args)...);
     systems.insert(std::make_pair(std::type_index(typeid(TSystem)), newSystem));
 }
 
@@ -222,11 +223,12 @@ void Registry::AddComponent(Entity entity, TArgs &&...args)
 
     if (!componentPools[componentId])
     {
-        Pool<TComponent> *newComponentPool = new Pool<TComponent>();
+        std::shared_ptr<Pool<TComponent>> newComponentPool =
+            std::make_shared<Pool<TComponent>>();
         componentPools[componentId] = newComponentPool;
     }
 
-    Pool<TComponent> *componentPool = componentPools[componentId];
+    std::shared_ptr<Pool<TComponent>> componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
 
     if (entityId >= componentPool->GetSize())
     {
