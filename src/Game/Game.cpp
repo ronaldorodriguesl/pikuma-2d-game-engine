@@ -3,6 +3,8 @@
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include "../Logger/Logger.h"
 #include "../ECS/ECS.h"
@@ -79,13 +81,45 @@ void Game::ProcessInput()
     }
 }
 
-void Game::Setup()
+void Game::LoadLevel(int level)
 {
     registry->AddSystem<MovementSystem>();
     registry->AddSystem<RenderSystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
+    assetStore->AddTexture(renderer, "jungle", "./assets/tilemaps/jungle.png");
+
+    int tileSize = 32;
+    int numCols = 10; // jungle.png is 320px wide / 32px tiles
+    double tileScale = 2.0;
+
+    std::fstream mapFile;
+    mapFile.open("./assets/tilemaps/jungle.map");
+
+    for (int y = 0; mapFile.eof() == false; y++)
+    {
+        std::string line;
+        if (!std::getline(mapFile, line) || line.empty())
+        {
+            continue;
+        }
+        std::stringstream lineStream(line);
+        std::string tileCode;
+        for (int x = 0; std::getline(lineStream, tileCode, ','); x++)
+        {
+            int tileId = std::stoi(tileCode);
+            int tileSrcX = (tileId % numCols) * tileSize;
+            int tileSrcY = (tileId / numCols) * tileSize;
+
+            Entity tile = registry->CreateEntity();
+            tile.AddComponent<TransformComponent>(
+                glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)),
+                glm::vec2(tileScale, tileScale), 0.0);
+            tile.AddComponent<SpriteComponent>("jungle", tileSize, tileSize, tileSrcX, tileSrcY);
+        }
+    }
+    mapFile.close();
 
     // Create an entity
     Entity tank = registry->CreateEntity();
@@ -97,6 +131,11 @@ void Game::Setup()
     truck.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 50.0));
     truck.AddComponent<SpriteComponent>("truck-image", 32, 32);
+}
+
+void Game::Setup()
+{
+    LoadLevel(1);
 }
 
 void Game::Update()
