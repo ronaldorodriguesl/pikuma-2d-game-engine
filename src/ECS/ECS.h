@@ -173,7 +173,6 @@ public:
 
     // Checks the component signature of an entity
     void AddEntityToSystem(Entity entity);
-
 };
 
 template <typename TComponent>
@@ -182,8 +181,6 @@ void System::RequireComponent()
     const auto componentId = Component<TComponent>::GetId();
     componentSignatures.set(componentId);
 }
-
-
 
 template <typename TSystem, typename... TArgs>
 void Registry::AddSystem(TArgs &&...args)

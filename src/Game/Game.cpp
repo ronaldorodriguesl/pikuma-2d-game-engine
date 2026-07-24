@@ -9,6 +9,7 @@
 Game::Game()
 {
     isRunning = false;
+    registry = new Registry();
     Logger::Log("Game constructor called");
 }
 
@@ -61,6 +62,8 @@ void Game::Initialize()
 
 void Game::Setup()
 {
+    Entity tank = registry->CreateEntity();
+    Entity trunk = registry->CreateEntity();
 }
 
 void Game::Update()
