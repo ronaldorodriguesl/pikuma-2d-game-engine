@@ -24,6 +24,7 @@ Game::Game()
     isRunning = false;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
+    eventBus = std::make_unique<EventBus>();
     Logger::Log("Game constructor called!");
 }
 
