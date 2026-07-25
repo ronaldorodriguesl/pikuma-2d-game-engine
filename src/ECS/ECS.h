@@ -4,6 +4,7 @@
 #include <bitset>
 #include <vector>
 #include <set>
+#include <deque>
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
@@ -41,6 +42,7 @@ private:
 public:
     Entity(int id) : id(id) {};
     Entity(const Entity &entity) = default;
+    void Kill();
     int GetId() const;
 
     Entity &operator=(const Entity &other) = default;
@@ -161,6 +163,8 @@ private:
     std::set<Entity> entitiesToBeAdded;
     std::set<Entity> entitiesToBeKilled;
 
+    std::deque<int> freeIds;
+
 public:
     Registry()
     {
@@ -175,6 +179,7 @@ public:
     void Update();
 
     Entity CreateEntity();
+    void KillEntity(Entity entity);
 
     template <typename TComponent, typename... TArgs>
     void AddComponent(Entity entity, TArgs &&...args);
@@ -196,6 +201,7 @@ public:
 
     // Checks the component signature
     void AddEntityToSystems(Entity entity);
+    void RemoveEntityFromSystems(Entity entity);
 };
 
 template <typename TComponent>

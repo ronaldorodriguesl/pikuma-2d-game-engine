@@ -58,6 +58,9 @@ public:
                     aCollider.isColliding = true;
                     bCollider.isColliding = true;
                     Logger::Log("works");
+
+                    a.Kill();
+                    b.Kill();
                 }
             }
         }
