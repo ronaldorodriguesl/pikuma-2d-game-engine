@@ -7,6 +7,7 @@
 #include "../Components/TransformComponent.h"
 #include "../Components/SpriteComponent.h"
 #include "../AssetStore/AssetStore.h"
+#include <algorithm>
 
 class RenderSystem : public System
 {
@@ -19,6 +20,31 @@ public:
     }
     void Update(SDL_Renderer *renderer, std::unique_ptr<AssetStore> &assetStore)
     {
+        struct RenderableEntity
+        {
+            TransformComponent transformComponent;
+            SpriteComponent spriteComponent;
+        };
+
+        std::vector<RenderableEntity> renderableEntities;
+
+        for (auto entity : GetSystemEntities())
+        {
+            RenderableEntity renderableEntity;
+            renderableEntity.spriteComponent = entity.GetComponent<SpriteComponent>();
+            renderableEntity.transformComponent = entity.GetComponent<TransformComponent>();
+            renderableEntities.emplace_back(renderableEntity);
+        }
+
+        // Sort the vector by the z-index value
+        std::sort(
+            renderableEntities.begin(),
+            renderableEntities.end(),
+            [](const RenderableEntity &a, const RenderableEntity &b)
+            {
+                return a.spriteComponent.zIndex < b.spriteComponent.zIndex;
+            });
+
         for (auto entity : GetSystemEntities())
         {
             const auto transform = entity.GetComponent<TransformComponent>();
@@ -30,7 +56,8 @@ public:
                 static_cast<int>(transform.position.x),
                 static_cast<int>(transform.position.y),
                 static_cast<int>(sprite.width * transform.scale.x),
-                static_cast<int>(sprite.height * transform.scale.y)};
+                static_cast<int>(sprite.height * transform.scale.y),
+            };
 
             SDL_RenderCopyEx(renderer,
                              assetStore->GetTexture(sprite.assetId),
