@@ -18,12 +18,18 @@ public:
     void Update()
     {
         auto entities = GetSystemEntities();
+
+        for (auto entity : entities)
+        {
+            entity.GetComponent<BoxColliderComponent>().isColliding = false;
+        }
+
         for (auto i = entities.begin(); i != entities.end(); i++)
         {
             Entity a = *i;
 
             auto aTransform = a.GetComponent<TransformComponent>();
-            auto aCollider = a.GetComponent<BoxColliderComponent>();
+            auto &aCollider = a.GetComponent<BoxColliderComponent>();
 
             for (auto j = i; j != entities.end(); j++)
             {
@@ -35,7 +41,7 @@ public:
                 }
 
                 auto bTransform = b.GetComponent<TransformComponent>();
-                auto bCollider = b.GetComponent<BoxColliderComponent>();
+                auto &bCollider = b.GetComponent<BoxColliderComponent>();
 
                 bool collisionHappened = CheckAABBCollision(
                     aTransform.position.x + aCollider.offset.x,
@@ -49,6 +55,8 @@ public:
 
                 if (collisionHappened)
                 {
+                    aCollider.isColliding = true;
+                    bCollider.isColliding = true;
                     Logger::Log("works");
                 }
             }

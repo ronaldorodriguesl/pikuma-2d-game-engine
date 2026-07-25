@@ -6,6 +6,7 @@
 #include "../ECS/ECS.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/SpriteComponent.h"
+#include "../Components/BoxColliderComponent.h"
 #include "../AssetStore/AssetStore.h"
 #include <algorithm>
 
@@ -18,7 +19,7 @@ public:
         RequireComponent<TransformComponent>();
         RequireComponent<SpriteComponent>();
     }
-    void Update(SDL_Renderer *renderer, std::unique_ptr<AssetStore> &assetStore)
+    void Update(SDL_Renderer *renderer, std::unique_ptr<AssetStore> &assetStore, bool isDebug)
     {
         struct RenderableEntity
         {
@@ -68,6 +69,27 @@ public:
                              SDL_FLIP_NONE
 
             );
+
+            const bool hasCollider = entity.HasComponent<BoxColliderComponent>();
+            if (isDebug && hasCollider)
+            {
+                const auto collider = entity.GetComponent<BoxColliderComponent>();
+                SDL_Rect colliderRect = {
+                    static_cast<int>(transform.position.x + collider.offset.x),
+                    static_cast<int>(transform.position.y + collider.offset.y),
+                    static_cast<int>(collider.width * transform.scale.x),
+                    static_cast<int>(collider.height * transform.scale.y),
+                };
+                if (collider.isColliding)
+                {
+                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                }
+                else
+                {
+                    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+                }
+                SDL_RenderDrawRect(renderer, &colliderRect);
+            }
         }
     }
 };

@@ -80,6 +80,10 @@ void Game::ProcessInput()
             {
                 isRunning = false;
             }
+            if (sdlEvent.key.keysym.sym == SDLK_d)
+            {
+                isDebug = !isDebug;
+            }
             break;
         }
     }
@@ -186,7 +190,7 @@ void Game::Render()
     SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
     SDL_RenderClear(renderer);
 
-    registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
+    registry->GetSystem<RenderSystem>().Update(renderer, assetStore, isDebug);
 
     SDL_RenderPresent(renderer);
 }

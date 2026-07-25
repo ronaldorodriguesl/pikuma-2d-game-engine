@@ -10,6 +10,7 @@ struct BoxColliderComponent
     int width;
     int height;
     glm::vec2 offset;
+    bool isColliding;
 
     BoxColliderComponent(int width = 0,
                          int height = 0,
@@ -18,6 +19,7 @@ struct BoxColliderComponent
         this->width = width;
         this->height = height;
         this->offset = offset;
+        this->isColliding = false;
     }
 };
 
