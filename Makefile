@@ -18,7 +18,7 @@ build:
 	$(CC) $(COMPILER_FLAGS) $(LANG_STD) $(INCLUDE_PATH) $(SRC_FILES) $(LINKER_FILES) -o $(OBJ_NAME)
 
 run:
-	./$(OBJ_NAME)
+	./$(OBJ_NAME)   
 
 clean:
 	rm $(OBJ_NAME)

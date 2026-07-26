@@ -2,6 +2,8 @@
 #define COLLISIONSYSTEM_H
 
 #include "../ECS/ECS.h"
+#include "../EventBus/EventBus.h"
+#include "../Events/CollisionEvent.h"
 #include "../Logger/Logger.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
@@ -15,7 +17,7 @@ public:
         RequireComponent<BoxColliderComponent>();
         RequireComponent<TransformComponent>();
     }
-    void Update()
+    void Update(std::unique_ptr<EventBus>& eventBus)
     {
         auto entities = GetSystemEntities();
 
@@ -59,8 +61,7 @@ public:
                     bCollider.isColliding = true;
                     Logger::Log("works");
 
-                    a.Kill();
-                    b.Kill();
+                    eventBus->EmitEvent<CollisionEvent>(a, b);
                 }
             }
         }

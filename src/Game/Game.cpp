@@ -18,6 +18,8 @@
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
+#include "../Systems/DamageSystem.h"
+#include "../Systems/KeyboardControlSystem.h"
 
 Game::Game()
 {
@@ -85,6 +87,7 @@ void Game::ProcessInput()
             {
                 isDebug = !isDebug;
             }
+            eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
             break;
         }
     }
@@ -96,6 +99,8 @@ void Game::LoadLevel(int level)
     registry->AddSystem<RenderSystem>();
     registry->AddSystem<AnimationSystem>();
     registry->AddSystem<CollisionSystem>();
+    registry->AddSystem<DamageSystem>();
+    registry->AddSystem<KeyboardControlSystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
@@ -179,10 +184,15 @@ void Game::Update()
     // Store the "previous" frame time
     millisecsPreviousFrame = SDL_GetTicks();
 
+    eventBus->Reset();
+
+    registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
+    registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+
     registry->GetSystem<MovementSystem>().Update(deltaTime);
     registry->GetSystem<AnimationSystem>().Update();
-    registry->GetSystem<CollisionSystem>().Update();
-    
+    registry->GetSystem<CollisionSystem>().Update(eventBus);
+
     registry->Update();
 }
 
